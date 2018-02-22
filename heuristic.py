@@ -6,7 +6,7 @@ import numpy as np
 states = {}
 cur_state = [0] * 16
 
-MAX = (1 << 20)
+MAX = np.uint32(1 << 20)
 
 def checkX(mask, pos):
 	return (mask & (1 << (pos + pos))) != 0
@@ -159,4 +159,48 @@ def solve(mask):
 	states[mask] = ans
 	return states[mask]
 
-print solve(0)
+def heur():
+	ans = 0
+	ans += solve(cur_state[0]) * solve(cur_state[0 + 1]) * solve(cur_state[0 + 2]) * solve(cur_state[0 + 3])
+	ans -= solve(flipboard(cur_state[0])) * solve(flipboard(cur_state[0 + 1])) * solve(flipboard(cur_state[0 + 2])) * solve(flipboard(cur_state[0 + 3]))
+
+	ans += solve(cur_state[0]) * solve(cur_state[0 + 4]) * solve(cur_state[0 + 8]) * solve(cur_state[0 + 12])
+	ans -= solve(flipboard(cur_state[0])) * solve(flipboard(cur_state[0 + 4])) * solve(flipboard(cur_state[0 + 8])) * solve(flipboard(cur_state[0 + 12]))
+
+
+	ans += solve(cur_state[4]) * solve(cur_state[4 + 1]) * solve(cur_state[4 + 2]) * solve(cur_state[4 + 3])
+	ans -= solve(flipboard(cur_state[4])) * solve(flipboard(cur_state[4 + 1])) * solve(flipboard(cur_state[4 + 2])) * solve(flipboard(cur_state[4 + 3]))
+
+	ans += solve(cur_state[1]) * solve(cur_state[1 + 4]) * solve(cur_state[1 + 8]) * solve(cur_state[1 + 12])
+	ans -= solve(flipboard(cur_state[1])) * solve(flipboard(cur_state[1 + 4])) * solve(flipboard(cur_state[1 + 8])) * solve(flipboard(cur_state[1 + 12]))
+
+
+	ans += solve(cur_state[8]) * solve(cur_state[8 + 1]) * solve(cur_state[8 + 2]) * solve(cur_state[8 + 3])
+	ans -= solve(flipboard(cur_state[8])) * solve(flipboard(cur_state[8 + 1])) * solve(flipboard(cur_state[8 + 2])) * solve(flipboard(cur_state[8 + 3]))
+
+	ans += solve(cur_state[2]) * solve(cur_state[2 + 4]) * solve(cur_state[2 + 8]) * solve(cur_state[2 + 12])
+	ans -= solve(flipboard(cur_state[2])) * solve(flipboard(cur_state[2 + 4])) * solve(flipboard(cur_state[2 + 8])) * solve(flipboard(cur_state[2 + 12]))
+
+
+	ans += solve(cur_state[12]) * solve(cur_state[12 + 1]) * solve(cur_state[12 + 2]) * solve(cur_state[12 + 3])
+	ans -= solve(flipboard(cur_state[12])) * solve(flipboard(cur_state[12 + 1])) * solve(flipboard(cur_state[12 + 2])) * solve(flipboard(cur_state[12 + 3]))
+
+	ans += solve(cur_state[3]) * solve(cur_state[3 + 4]) * solve(cur_state[3 + 8]) * solve(cur_state[3 + 12])
+	ans -= solve(flipboard(cur_state[3])) * solve(flipboard(cur_state[3 + 4])) * solve(flipboard(cur_state[3 + 8])) * solve(flipboard(cur_state[3 + 12]))
+
+	# Diamonds
+	ans += solve(cur_state[1]) * solve(cur_state[1 + 3]) * solve(cur_state[1 + 5]) * solve(cur_state[1 + 8])
+	ans -= solve(flipboard(cur_state[1])) * solve(flipboard(cur_state[1 + 3])) * solve(flipboard(cur_state[1 + 5])) * solve(flipboard(cur_state[1 + 8]))
+
+	ans += solve(cur_state[2]) * solve(cur_state[2 + 3]) * solve(cur_state[2 + 5]) * solve(cur_state[2 + 8])
+	ans -= solve(flipboard(cur_state[2])) * solve(flipboard(cur_state[2 + 3])) * solve(flipboard(cur_state[2 + 5])) * solve(flipboard(cur_state[2 + 8]))
+
+	ans += solve(cur_state[5]) * solve(cur_state[5 + 3]) * solve(cur_state[5 + 5]) * solve(cur_state[5 + 8])
+	ans -= solve(flipboard(cur_state[5])) * solve(flipboard(cur_state[5 + 3])) * solve(flipboard(cur_state[5 + 5])) * solve(flipboard(cur_state[5 + 8]))
+
+	ans += solve(cur_state[6]) * solve(cur_state[6 + 3]) * solve(cur_state[6 + 5]) * solve(cur_state[6 + 8])
+	ans -= solve(flipboard(cur_state[6])) * solve(flipboard(cur_state[6 + 3])) * solve(flipboard(cur_state[6 + 5])) * solve(flipboard(cur_state[6 + 8]))
+
+	return ans
+
+print heur()
