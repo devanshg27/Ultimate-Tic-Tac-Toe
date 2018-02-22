@@ -1,12 +1,10 @@
 # 01 -> X
 # 10 -> Y
 
-import numpy as np
-
 states = {}
-cur_state = [0] * 16
+cur_state = [1] * 16
 
-MAX = np.uint32(1 << 20)
+MAX = (1 << 20)
 
 def checkX(mask, pos):
 	return (mask & (1 << (pos + pos))) != 0
@@ -17,7 +15,7 @@ def checkO(mask, pos):
 def flipboard(mask):
 	for i in xrange(16):
 		if checkX(mask, i) or checkO(mask, i):
-			mask ^= ( (1 << (pos + pos)) + (1 << (pos + pos + 1)) )
+			mask ^= ( (1 << (i + i)) + (1 << (i + i + 1)) )
 	return mask
 
 def match_win(mask):
@@ -92,13 +90,13 @@ def solve(mask):
 	if mask in states:
 		return states[mask]
 	if match_win(mask):
-		states[mask] = np.uint32(MAX)
+		states[mask] = (MAX)
 		return MAX
 	elif match_draw(mask):
-		states[mask] = np.uint32(0)
+		states[mask] = (0)
 		return 0
 
-	ans = np.uint32(0)
+	ans = (0)
 
 	if checkO(mask, 0) or checkO(mask, 0 + 1) or checkO(mask, 0 + 2) or checkO(mask, 0 + 3):
 		pass
@@ -165,7 +163,7 @@ def solve(mask):
 		num = checkX(mask, 6) + checkX(mask, 6 + 3) + checkX(mask, 6 + 5) + checkX(mask, 6 + 8)
 		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
 
-	states[mask] = ans
+	states[mask] = (ans*1.0)/2**15
 	return states[mask]
 
 def heur():
@@ -212,4 +210,9 @@ def heur():
 
 	return ans
 
-print heur()
+def heur_draw():
+	ans = solve(0) * 6 + solve(1) * 4 + solve(2) * 4 + solve(3) * 6
+	ans += solve(4+0) * 4 + solve(4+1) * 3 + solve(4+2) * 3 + solve(4+3) * 4
+	ans += solve(8+0) * 4 + solve(8+1) * 3 + solve(8+2) * 3 + solve(8+3) * 4
+	ans += solve(12+0) * 6 + solve(12+1) * 4 + solve(12+2) * 4 + solve(12+3) * 6
+	return ans/100.0
