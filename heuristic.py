@@ -16,7 +16,7 @@ def checkO(mask, pos):
 
 def flipboard(mask):
 	for i in xrange(16):
-		if checkX(mask, i) or checkO(mask, i)
+		if checkX(mask, i) or checkO(mask, i):
 			mask ^= ( (1 << (pos + pos)) + (1 << (pos + pos + 1)) )
 	return mask
 
