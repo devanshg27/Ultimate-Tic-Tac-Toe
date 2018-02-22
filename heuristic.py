@@ -3,58 +3,160 @@
 
 import numpy as np
 
-states = {} 
+states = {}
+cur_state = [0] * 16
 
 MAX = (1 << 20)
-LIM = (1 << 32) - 1
 
 def checkX(mask, pos):
-	if (mask & (1 << (pos + pos))) and ((mask & (1 << (pos + pos + 1))) == 0):
-		return True
-	return False
+	return (mask & (1 << (pos + pos))) != 0
 
 def checkO(mask, pos):
-	if (mask & (1 << (pos + pos + 1))) and ((mask & (1 << (pos + pos))) == 0):
+	return (mask & (1 << (pos + pos + 1))) != 0
+
+def match_win(mask):
+	# Rows and columns
+	if checkX(mask, 0) and checkX(mask, 0 + 1) and checkX(mask, 0 + 2) and checkX(mask, 0 + 3):
+		return True
+	if checkX(mask, 0) and checkX(mask, 0 + 4) and checkX(mask, 0 + 8) and checkX(mask, 0 + 12):
+		return True
+
+	if checkX(mask, 4) and checkX(mask, 4 + 1) and checkX(mask, 4 + 2) and checkX(mask, 4 + 3):
+		return True
+	if checkX(mask, 1) and checkX(mask, 1 + 4) and checkX(mask, 1 + 8) and checkX(mask, 1 + 12):
+		return True
+
+	if checkX(mask, 8) and checkX(mask, 8 + 1) and checkX(mask, 8 + 2) and checkX(mask, 8 + 3):
+		return True
+	if checkX(mask, 2) and checkX(mask, 2 + 4) and checkX(mask, 2 + 8) and checkX(mask, 2 + 12):
+		return True
+
+	if checkX(mask, 12) and checkX(mask, 12 + 1) and checkX(mask, 12 + 2) and checkX(mask, 12 + 3):
+		return True
+	if checkX(mask, 3) and checkX(mask, 3 + 4) and checkX(mask, 3 + 8) and checkX(mask, 3 + 12):
+		return True
+	# Diamonds
+	if checkX(mask, 1) and checkX(mask, 1 + 3) and checkX(mask, 1 + 5) and checkX(mask, 1 + 8):
+		return True
+	if checkX(mask, 2) and checkX(mask, 2 + 3) and checkX(mask, 2 + 5) and checkX(mask, 2 + 8):
+		return True
+	if checkX(mask, 5) and checkX(mask, 5 + 3) and checkX(mask, 5 + 5) and checkX(mask, 5 + 8):
+		return True
+	if checkX(mask, 6) and checkX(mask, 6 + 3) and checkX(mask, 6 + 5) and checkX(mask, 6 + 8):
 		return True
 	return False
 
-def match_win(mask):
-	for i in xrange(0, 3):
-		if checkX(mask, 4 * i) and checkX(mask, 4 * i + 1) and checkX(mask, 4 * i + 2) and checkX(mask, 4 * i + 3):
-			return True
-		if checkX(mask, i) and checkX(mask, i + 4) and checkX(mask, i + 8) and checkX(mask, i + 12):
-			return True
+def match_draw(mask):
+	# Rows and columns
+	cnt = 0
+	if checkO(mask, 0) or checkO(mask, 0 + 1) or checkO(mask, 0 + 2) or checkO(mask, 0 + 3):
+		cnt += 1
+	if checkO(mask, 0) or checkO(mask, 0 + 4) or checkO(mask, 0 + 8) or checkO(mask, 0 + 12):
+		cnt += 1
 
-	if checkX()
+	if checkO(mask, 4) or checkO(mask, 4 + 1) or checkO(mask, 4 + 2) or checkO(mask, 4 + 3):
+		cnt += 1
+	if checkO(mask, 1) or checkO(mask, 1 + 4) or checkO(mask, 1 + 8) or checkO(mask, 1 + 12):
+		cnt += 1
 
-	return False 
+	if checkO(mask, 8) or checkO(mask, 8 + 1) or checkO(mask, 8 + 2) or checkO(mask, 8 + 3):
+		cnt += 1
+	if checkO(mask, 2) or checkO(mask, 2 + 4) or checkO(mask, 2 + 8) or checkO(mask, 2 + 12):
+		cnt += 1
+
+	if checkO(mask, 12) or checkO(mask, 12 + 1) or checkO(mask, 12 + 2) or checkO(mask, 12 + 3):
+		cnt += 1
+	if checkO(mask, 3) or checkO(mask, 3 + 4) or checkO(mask, 3 + 8) or checkO(mask, 3 + 12):
+		cnt += 1
+	# Diamonds
+	if checkO(mask, 1) or checkO(mask, 1 + 3) or checkO(mask, 1 + 5) or checkO(mask, 1 + 8):
+		cnt += 1
+	if checkO(mask, 2) or checkO(mask, 2 + 3) or checkO(mask, 2 + 5) or checkO(mask, 2 + 8):
+		cnt += 1
+	if checkO(mask, 5) or checkO(mask, 5 + 3) or checkO(mask, 5 + 5) or checkO(mask, 5 + 8):
+		cnt += 1
+	if checkO(mask, 6) or checkO(mask, 6 + 3) or checkO(mask, 6 + 5) or checkO(mask, 6 + 8):
+		cnt += 1
+	return (cnt == 12)
 
 def solve(mask):
-
 	if mask in states:
 		return states[mask]
 	if match_win(mask):
-		return states[mask] = MAX
-	elif match_loss(mask):
-		return states[mask] = 0
+		states[mask] = np.uint32(MAX)
+		return MAX
 	elif match_draw(mask):
-		return states[mask] = 0
+		states[mask] = np.uint32(0)
+		return 0
 
-	ans = 0
-	for i in xrange(0, 15):
-		X = 1 << (i + i)
-		Y = 1 << (i + i + 1)
-		if (mask & X) and (mask & Y):
-			new_mask = mask - X 
-			ans = solve(new_mask) + solve(new_mask ^ LIM)
-		elif (mask & X):
-			pass
-		elif (mask & Y):
-			pass
-		else:
-			new_mask = mask | X
-			ans = solve(new_mask) + solve(new_mask ^ LIM)
+	ans = np.uint32(0)
+
+	if checkO(mask, 0) or checkO(mask, 0 + 1) or checkO(mask, 0 + 2) or checkO(mask, 0 + 3):
+		pass
+	else:
+		num = checkX(mask, 0) + checkX(mask, 0 + 1) + checkX(mask, 0 + 2) + checkX(mask, 0 + 3)
+		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
+	if checkO(mask, 0) or checkO(mask, 0 + 4) or checkO(mask, 0 + 8) or checkO(mask, 0 + 12):
+		pass
+	else:
+		num = checkX(mask, 0) + checkX(mask, 0 + 4) + checkX(mask, 0 + 8) + checkX(mask, 0 + 12)
+		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
+
+	if checkO(mask, 4) or checkO(mask, 4 + 1) or checkO(mask, 4 + 2) or checkO(mask, 4 + 3):
+		pass
+	else:
+		num = checkX(mask, 4) + checkX(mask, 4 + 1) + checkX(mask, 4 + 2) + checkX(mask, 4 + 3)
+		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
+	if checkO(mask, 1) or checkO(mask, 1 + 4) or checkO(mask, 1 + 8) or checkO(mask, 1 + 12):
+		pass
+	else:
+		num = checkX(mask, 1) + checkX(mask, 1 + 4) + checkX(mask, 1 + 8) + checkX(mask, 1 + 12)
+		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
+
+	if checkO(mask, 8) or checkO(mask, 8 + 1) or checkO(mask, 8 + 2) or checkO(mask, 8 + 3):
+		pass
+	else:
+		num = checkX(mask, 8) + checkX(mask, 8 + 1) + checkX(mask, 8 + 2) + checkX(mask, 8 + 3)
+		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
+	if checkO(mask, 2) or checkO(mask, 2 + 4) or checkO(mask, 2 + 8) or checkO(mask, 2 + 12):
+		pass
+	else:
+		num = checkX(mask, 2) + checkX(mask, 2 + 4) + checkX(mask, 2 + 8) + checkX(mask, 2 + 12)
+		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
+
+	if checkO(mask, 12) or checkO(mask, 12 + 1) or checkO(mask, 12 + 2) or checkO(mask, 12 + 3):
+		pass
+	else:
+		num = checkX(mask, 12) + checkX(mask, 12 + 1) + checkX(mask, 12 + 2) + checkX(mask, 12 + 3)
+		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
+	if checkO(mask, 3) or checkO(mask, 3 + 4) or checkO(mask, 3 + 8) or checkO(mask, 3 + 12):
+		pass
+	else:
+		num = checkX(mask, 3) + checkX(mask, 3 + 4) + checkX(mask, 3 + 8) + checkX(mask, 3 + 12)
+		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
+	# Diamonds
+	if checkO(mask, 1) or checkO(mask, 1 + 3) or checkO(mask, 1 + 5) or checkO(mask, 1 + 8):
+		pass
+	else:
+		num = checkX(mask, 1) + checkX(mask, 1 + 3) + checkX(mask, 1 + 5) + checkX(mask, 1 + 8)
+		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
+	if checkO(mask, 2) or checkO(mask, 2 + 3) or checkO(mask, 2 + 5) or checkO(mask, 2 + 8):
+		pass
+	else:
+		num = checkX(mask, 2) + checkX(mask, 2 + 3) + checkX(mask, 2 + 5) + checkX(mask, 2 + 8)
+		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
+	if checkO(mask, 5) or checkO(mask, 5 + 3) or checkO(mask, 5 + 5) or checkO(mask, 5 + 8):
+		pass
+	else:
+		num = checkX(mask, 5) + checkX(mask, 5 + 3) + checkX(mask, 5 + 5) + checkX(mask, 5 + 8)
+		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
+	if checkO(mask, 6) or checkO(mask, 6 + 3) or checkO(mask, 6 + 5) or checkO(mask, 6 + 8):
+		pass
+	else:
+		num = checkX(mask, 6) + checkX(mask, 6 + 3) + checkX(mask, 6 + 5) + checkX(mask, 6 + 8)
+		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
+
 	states[mask] = ans
-	return ans
+	return states[mask]
 
 print solve(0)
