@@ -215,4 +215,16 @@ def heur_draw():
 	ans += solve(4+0) * 4 + solve(4+1) * 3 + solve(4+2) * 3 + solve(4+3) * 4
 	ans += solve(8+0) * 4 + solve(8+1) * 3 + solve(8+2) * 3 + solve(8+3) * 4
 	ans += solve(12+0) * 6 + solve(12+1) * 4 + solve(12+2) * 4 + solve(12+3) * 6
-	return ans/100.0
+	return ans
+
+def evaluation():
+	if match_win(cur_win_state):
+		return 2**30
+	if match_loss(cur_win_state):
+		return -2**30
+	return heur()
+
+def evaluation_draw():
+	if match_loss(cur_win_state):
+		return -2**30
+	return heur_draw()
