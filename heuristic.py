@@ -14,6 +14,12 @@ def checkX(mask, pos):
 def checkO(mask, pos):
 	return (mask & (1 << (pos + pos + 1))) != 0
 
+def flipboard(mask):
+	for i in xrange(16):
+		if checkX(mask, i) or checkO(mask, i)
+			mask ^= ( (1 << (pos + pos)) + (1 << (pos + pos + 1)) )
+	return mask
+
 def match_win(mask):
 	# Rows and columns
 	if checkX(mask, 0) and checkX(mask, 0 + 1) and checkX(mask, 0 + 2) and checkX(mask, 0 + 3):
@@ -45,6 +51,9 @@ def match_win(mask):
 	if checkX(mask, 6) and checkX(mask, 6 + 3) and checkX(mask, 6 + 5) and checkX(mask, 6 + 8):
 		return True
 	return False
+
+def match_loss(mask):
+	return match_win(flipboard(mask))
 
 def match_draw(mask):
 	# Rows and columns
