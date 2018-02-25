@@ -514,9 +514,6 @@ class Team67():
 
 		self.update(board, flag)
 
-		signal.signal(signal.SIGALRM, self.signal_handler)
-		signal.alarm(15)
-
 		# print 'Enter your move: <format:row column> (you\'re playing with', flag + ")"
 		# print "last move", old_move
 
@@ -538,15 +535,24 @@ class Team67():
 
 		cannotWin = match_draw(self.block_winner)
 
-		for depth in xrange(5, 6):
-			print depth
-			self.cached_states = {}
-			self.level = depth
-			if cannotWin:
-				self.minimax_draw(depth, -MAX_VAL, MAX_VAL, 1, old_move, self.zobrist_hash, self.last_win)
-			else:
-				self.minimax(depth, -MAX_VAL, MAX_VAL, 1, old_move, self.zobrist_hash, self.last_win)
-			current_move = self.best_move
+		signal.signal(signal.SIGALRM, self.signal_handler)
+		signal.alarm(15)
+
+		try:
+			for depth in xrange(3, 100):
+				print depth
+				self.cached_states = {}
+				self.level = depth
+				if cannotWin:
+					self.minimax_draw(depth, -MAX_VAL, MAX_VAL, 1, old_move, self.zobrist_hash, self.last_win)
+				else:
+					self.minimax(depth, -MAX_VAL, MAX_VAL, 1, old_move, self.zobrist_hash, self.last_win)
+				current_move = self.best_move
+
+		except Exception as e:
+			print e,
+
+		signal.alarm(0)
 
 		# depth = 3
 		# while time.time() - cur_time < 10:
