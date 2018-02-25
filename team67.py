@@ -1,3 +1,6 @@
+from random import randint
+import signal
+
 MAX_VAL = 2**63
 
 def checkX(mask, pos):
@@ -9,7 +12,7 @@ def checkO(mask, pos):
 def flipboard(mask):
 	for i in xrange(16):
 		if checkX(mask, i) or checkO(mask, i):
-			mask ^= ( (1 << (pos + pos)) + (1 << (pos + pos + 1)) )
+			mask ^= ( (1 << (i + i)) + (1 << (i + i + 1)) )
 	return mask
 
 def match_win(mask):
@@ -51,129 +54,180 @@ def match_loss(mask):
 class Team67():
 
 	def __init__(self):
-		self.last_win = False
 		self.level = 0
-		self.cached_states = []
+		self.cached_states = {}
 		self.zobrist_hash = 0
 		self.zobrist_values = [[], []]
 		for i in xrange(256):
-			self.zobrist_values[0].append(random.randint(0, MAX_VAL))
-			self.zobrist_values[1].append(random.randint(0, MAX_VAL))
+			self.zobrist_values[0].append(randint(0, MAX_VAL))
+			self.zobrist_values[1].append(randint(0, MAX_VAL))
 		self.board = [0 for i in xrange(16)]
 
 		# 0 : No winner rn, 1 : X, 2 : O
 		self.block_winner = [0 for i in xrange(16)] 
 
-	def checkX(mask, pos):
+	def signal_handler(self, signum, frame):
+		raise Exception('Timed out!')
+
+	def checkX(self, mask, pos):
 		return (mask & (1 << (pos + pos))) != 0
 
-	def checkO(mask, pos):
+	def checkO(self, mask, pos):
 		return (mask & (1 << (pos + pos + 1))) != 0
 
-	def getValidMoves(old_move):
+	def getValidMoves(self, old_move):
 
 		valid_moves = []
-		block_x, block_y = old_move[0] >> 2, old_move[1] >> 2
-		block = (block_x << 2) + block_y
-
+		(move_bx, move_by) = (old_move[0] & 3, old_move[1] & 3) 
+		move_b = (move_bx << 2) + move_by
 		possible = False
-		if self.block_winner[block] == 0:
+
+		if not self.block_winner[move_b]:
 			for position in xrange(16):
-				if self.checkX(self.board[block], position) or self.checkO(self.board[block], position):
+				if self.checkX(self.board[move_b], position) or self.checkO(self.board[move_b], position):
 					pass
 				else:
 					possible = True
-					valid_moves.append((position / 4), position & 3)
+					new_x, new_y = (move_bx << 2) + (position >> 2), (move_by << 2) + (position & 3) 
+					valid_moves.append((new_x, new_y))
 
 		if possible:
 			return valid_moves
 
-		for block in xrange(16):
-			if self.block_winner[block] != 0:
-				continue
-			for position in xrange(16):
-				if self.checkX(self.board[block], position) or self.checkO(self.board[block], position):
-					pass
-				else:
-					valid_moves.append((position / 4), position & 3)
+		for move_b in xrange(16):
+			if self.block_winner[move_b] == 0:
+				(move_bx, move_by) = (move_b >> 2, move_b & 3) 
+				for position in xrange(16):
+					if self.checkX(self.board[move_b], position) or self.checkO(self.board[move_b], position):
+						pass
+					else:
+						possible = True
+						new_x, new_y = (move_bx << 2) + (position >> 2), (move_by << 2) + (position & 3) 
+						valid_moves.append((new_x, new_y))
+
 		return valid_moves				
 
-	def minimax(depth, alpha, beta, isMaximizing, old_move, current_hash, bonus_used):
-		# check terminal state here
+	# def minimax(self, depth, alpha, beta, isMaximizing, old_move, current_hash, bonus_used):
+	# 	# check terminal state here
 
-		if (current_hash, isMaximizing, bonus_used) in self.cached_states:
-			return self.cached_states[(current_hash, isMaximizing, bonus_used)]
+	# 	if (current_hash, isMaximizing, bonus_used) in self.cached_states:
+	# 		return self.cached_states[(current_hash, isMaximizing, bonus_used)]
 
-		valid_moves = getValidMoves(old_move)
+	# 	valid_moves = self.getValidMoves(old_move)
 
-		new_val = 0
-		if isMaximizing:
-			new_val = -MAX_VAL
-			for current_move in valid_moves:
+	# 	new_val = 0
+	# 	if isMaximizing:
+	# 		new_val = -MAX_VAL
+	# 		for current_move in valid_moves:
 
-				# update changes in global variables here
-				win_block, updated_hash = update()
-				
-				if win_block and not bonus_used:
-					t_val = self.minimax(depth - 1, alpha, beta, isMaximizing, current_move, updated_hash, True)
-				else:
-					t_val = self.minimax(depth - 1, alpha, beta, not isMaximizing, current_move, updated_hash, False)
+	# 			# update changes in global variables here
+	# 			# win_block, updated_hash = update()
+	# 			win_block = False
+	# 			updated_hash = current_hash
 
-				if t_val > new_val:
-					if self.level == depth:
-						self.best_move = current_move
-					new_val = t_val
+	# 			if win_block and not bonus_used:
+	# 				t_val = self.minimax(depth - 1, alpha, beta, isMaximizing, current_move, updated_hash, True)
+	# 			else:
+	# 				t_val = self.minimax(depth - 1, alpha, beta, not isMaximizing, current_move, updated_hash, False)
 
-				if alpha < new_val:
-					alpha = new_val
+	# 			if t_val > new_val:
+	# 				if self.level == depth:
+	# 					self.best_move = current_move
+	# 				new_val = t_val
 
-				# revert changes in global variables here
+	# 			if alpha < new_val:
+	# 				alpha = new_val
 
-				if beta <= alpha:
-					break
+	# 			# revert changes in global variables here
+
+	# 			if beta <= alpha:
+	# 				break
 		
-		else:
-			pass
+	# 	else:
+	# 		pass
 
-		self.cached_states[(current_hash, isMaximizing, bonus_used)] = new_val
-		return new_val
+	# 	self.cached_states[(current_hash, isMaximizing, bonus_used)] = new_val
+	# 	return new_val
 
+	def print_board(self, board):
+		print "current board"
+		for x in xrange(16):
+			for y in xrange(16):
+				print board.board_status[x][y],
+				if y and (y%4 == 3):
+					print " ",
+			if x and (x%4 == 3):
+				print ""
+			print ""
+		
+
+	def update(self, board, my_symbol):
+	
+		# self.print_board(board)		
+		self.zobrist_hash = 0
+		
+		for current_block in xrange(16):
+			self.board[current_block] = 0
+			(block_x, block_y) = (current_block >> 2, current_block & 3)
+			for x in xrange(4):
+				for y in xrange(4):
+					(abs_x, abs_y) = ((block_x << 2) + x, (block_y << 2) + y)
+					if board.board_status[abs_x][abs_y] == '-':
+						pass
+					elif board.board_status[abs_x][abs_y] == my_symbol:
+						self.zobrist_hash ^= self.zobrist_values[0][(abs_x << 4) + abs_y]
+						self.board[current_block] |= (1 << (((x << 2) + y) << 1))
+					else:
+						self.zobrist_hash ^= self.zobrist_values[1][(abs_x << 4) + abs_y]
+						self.board[current_block] |= (1 << ((((x << 2) + y) << 1) + 1))			
+			if match_win(self.board[current_block]):
+				self.block_winner[current_block] = 1
+			elif match_loss(self.board[current_block]):
+				self.block_winner[current_block] = 2
+			else:
+				self.block_winner[current_block] = 0
 
 	def move(self, board, old_move, flag):
-		print 'Enter your move: <format:row column> (you\'re playing with', flag + ")"
-			
-		self.zobrist_hash ^= self.zobrist_values[1][old_move[0] * 16 + old_move[1]]
-		block_x, block_y = old_move[0] >> 2, old_move[1] >> 2
-		block = (block_x << 2) + block_y
-		pos_x, pos_y = old_move[0] & 3, old_move[1] & 3 
-		self.board[block] |= (1 << (1 + ((pos_y + (pos_x << 2)) << 1)))
-		
-		if match_loss(self.board[block]):
-			self.block_winner[block] = 2
 
+		self.update(board, flag)
+
+		# signal.signal(signal.SIGALRM, self.signal_handler)
+		# signal.alarm(15)
+
+		# print 'Enter your move: <format:row column> (you\'re playing with', flag + ")"
+		# print "last move", old_move
+
+		(last_x, last_y) = (old_move[0], old_move[1])
 		current_move = (-1, -1)
-		for depth in xrange(255):
-			self.cached_states = []
-			self.level = depth
-			self.minimax(depth, ALPHA, BETA, 1, old_move, self.zobrist_hash, self.last_win)
-			current_move = self.best_move
 
-		old_move = current_move
-		self.zobrist_hash ^= self.zobrist_values[0][old_move[0] * 16 + old_move[1]]
-		block_x, block_y = old_move[0] >> 2, old_move[1] >> 2
-		block = (block_x << 2) + block_y
-		pos_x, pos_y = old_move[0] & 3, old_move[1] & 3 
-		self.board[block] |= (1 << (((pos_y + (pos_x << 2)) << 1)))
-		
-		if match_win(self.board[block]):
-			self.block_winner[block] = 1
-			self.last_win = True
-
+		if (last_x, last_y) != (-1, -1):
+			(row, col) = (last_x >> 2, last_y >> 2)
+			last_block = (row << 2) + col
+			(last_posx, last_posy) = (last_x & 3, last_y & 3)
+			cell = (last_posy + (last_posx << 2))
+			current_move = self.getValidMoves(old_move)
+			current_move = current_move[0]
 		else:
-			self.last_win = False
+			# starting move
+			current_move = ((0, 0))
+
+		# try:
+		# for depth in xrange(3, 5, 2):
+		# 	self.cached_states = {}
+		# 	self.level = depth
+		# 	self.minimax(depth, -MAX_VAL, MAX_VAL, 1, old_move, self.zobrist_hash, self.last_win)
+		# 	current_move = self.best_move
+
+		# except Exception as exception:
+		# 	print "rekt" 
+
+		# print "old move", old_move
+		# print "cur move", current_move
+
+		(cur_x, cur_y) = (current_move[0], current_move[1])
+		(cur_bx, cur_by) = (cur_x >> 2, cur_y >> 2)
+		cur_block = (cur_bx << 2) + cur_by
+		(cur_posx, cur_posy) = (cur_x & 3, cur_y & 3)
+		cell = (cur_posy + (cur_posx << 2))
 
 		return current_move
-		# mvp = raw_input()
-		# mvp = mvp.split()
-		# return (int(mvp[0]), int(mvp[1]))
-

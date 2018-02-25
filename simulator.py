@@ -5,6 +5,7 @@ import time
 import copy
 import traceback
 from team67 import Team67
+from monteCarlo import MonteCarlo
 
 TIME = 16
 MAX_PTS = 68
@@ -369,6 +370,9 @@ if __name__ == '__main__':
 	elif option == '4':
 		obj1 = Team67()
 		obj2 = Random_Player()
+	elif option == '5':
+		obj1 = Team67()
+		obj2 = MonteCarlo()
 	else:
 		print 'Invalid option'
 		sys.exit(1)
