@@ -1,4 +1,5 @@
 from random import randint
+import time
 import signal
 
 MAX_VAL = 2**63
@@ -54,6 +55,7 @@ def match_loss(mask):
 class Team67():
 
 	def __init__(self):
+		self.last_win = False
 		self.level = 0
 		self.cached_states = {}
 		self.zobrist_hash = 0
@@ -107,47 +109,86 @@ class Team67():
 
 		return valid_moves				
 
-	# def minimax(self, depth, alpha, beta, isMaximizing, old_move, current_hash, bonus_used):
-	# 	# check terminal state here
+	def try_update(self, current_move):
+		(cur_x, cur_y) = (current_move[0], current_move[1])
+		(cur_bx, cur_by) = (cur_x >> 2, cur_y >> 2)
+		cur_block = (cur_bx << 2) + cur_by
+		(cur_posx, cur_posy) = (cur_x & 3, cur_y & 3)
+		cell = (cur_posy + (cur_posx << 2))
 
-	# 	if (current_hash, isMaximizing, bonus_used) in self.cached_states:
-	# 		return self.cached_states[(current_hash, isMaximizing, bonus_used)]
+		self.board[cur_block] |= (1 << (cell << 1))
+		self.zobrist_hash ^= self.zobrist_values[0][(cur_x << 4) + cur_y]
 
-	# 	valid_moves = self.getValidMoves(old_move)
+		if match_win(cur_block):
+			self.block_winner[cur_block] = 1
+		elif match_loss(cur_block):
+			self.block_winner[cur_block] = 2
+		else:
+			self.block_winner[cur_block] = 0
 
-	# 	new_val = 0
-	# 	if isMaximizing:
-	# 		new_val = -MAX_VAL
-	# 		for current_move in valid_moves:
+		if self.block_winner[cur_block]:
+			return True
+		else:
+			return False
 
-	# 			# update changes in global variables here
-	# 			# win_block, updated_hash = update()
-	# 			win_block = False
-	# 			updated_hash = current_hash
+	def try_revert(self, current_move):
+		(cur_x, cur_y) = (current_move[0], current_move[1])
+		(cur_bx, cur_by) = (cur_x >> 2, cur_y >> 2)
+		cur_block = (cur_bx << 2) + cur_by
+		(cur_posx, cur_posy) = (cur_x & 3, cur_y & 3)
+		cell = (cur_posy + (cur_posx << 2))
 
-	# 			if win_block and not bonus_used:
-	# 				t_val = self.minimax(depth - 1, alpha, beta, isMaximizing, current_move, updated_hash, True)
-	# 			else:
-	# 				t_val = self.minimax(depth - 1, alpha, beta, not isMaximizing, current_move, updated_hash, False)
+		self.board[cur_block] -= (1 << (cell << 1))
+		self.zobrist_hash ^= self.zobrist_values[0][(cur_x << 4) + cur_y]
 
-	# 			if t_val > new_val:
-	# 				if self.level == depth:
-	# 					self.best_move = current_move
-	# 				new_val = t_val
+		if match_win(cur_block):
+			self.block_winner[cur_block] = 1
+		elif match_loss(cur_block):
+			self.block_winner[cur_block] = 2
+		else:
+			self.block_winner[cur_block] = 0
 
-	# 			if alpha < new_val:
-	# 				alpha = new_val
 
-	# 			# revert changes in global variables here
+	def minimax(self, depth, alpha, beta, isMaximizing, old_move, current_hash, bonus_used):
+		# check terminal state here
 
-	# 			if beta <= alpha:
-	# 				break
+		if (current_hash, isMaximizing, bonus_used) in self.cached_states:
+			return self.cached_states[(current_hash, isMaximizing, bonus_used)]
+
+		valid_moves = self.getValidMoves(old_move)
+
+		new_val = 0
+		if isMaximizing:
+			new_val = -MAX_VAL
+			for current_move in valid_moves:
+
+				# update changes in global variables here
+				win_block = self.try_update(current_move)
+
+				if win_block and not bonus_used:
+					t_val = self.minimax(depth - 1, alpha, beta, isMaximizing, current_move, self.zobrist_hash, True)
+				else:
+					t_val = self.minimax(depth - 1, alpha, beta, not isMaximizing, current_move, self.zobrist_hash, False)
+
+				if t_val > new_val:
+					if self.level == depth:
+						self.best_move = current_move
+					new_val = t_val
+
+				if alpha < new_val:
+					alpha = new_val
+
+				# revert changes in global variables here
+				self.try_revert(current_move)
+
+				if beta <= alpha:
+					break
 		
-	# 	else:
-	# 		pass
+		else:
+			pass
 
-	# 	self.cached_states[(current_hash, isMaximizing, bonus_used)] = new_val
-	# 	return new_val
+		self.cached_states[(current_hash, isMaximizing, bonus_used)] = new_val
+		return new_val
 
 	def print_board(self, board):
 		print "current board"
@@ -189,10 +230,12 @@ class Team67():
 
 	def move(self, board, old_move, flag):
 
+		cur_time = time.time()
+
 		self.update(board, flag)
 
-		# signal.signal(signal.SIGALRM, self.signal_handler)
-		# signal.alarm(15)
+		signal.signal(signal.SIGALRM, self.signal_handler)
+		signal.alarm(15)
 
 		# print 'Enter your move: <format:row column> (you\'re playing with', flag + ")"
 		# print "last move", old_move
@@ -211,23 +254,33 @@ class Team67():
 			# starting move
 			current_move = ((0, 0))
 
-		# try:
-		# for depth in xrange(3, 5, 2):
-		# 	self.cached_states = {}
-		# 	self.level = depth
-		# 	self.minimax(depth, -MAX_VAL, MAX_VAL, 1, old_move, self.zobrist_hash, self.last_win)
-		# 	current_move = self.best_move
+		print cur_time
 
-		# except Exception as exception:
-		# 	print "rekt" 
+		depth = 3
+		while time.time() - cur_time < 0.1:
+			self.cached_states = {}
+			self.level = depth
+			self.minimax(depth, -MAX_VAL, MAX_VAL, 1, old_move, self.zobrist_hash, self.last_win)
+			current_move = self.best_move
+			depth = depth + 2
+			# print time.time() - cur_time
+			# print depth
 
 		# print "old move", old_move
 		# print "cur move", current_move
+
 
 		(cur_x, cur_y) = (current_move[0], current_move[1])
 		(cur_bx, cur_by) = (cur_x >> 2, cur_y >> 2)
 		cur_block = (cur_bx << 2) + cur_by
 		(cur_posx, cur_posy) = (cur_x & 3, cur_y & 3)
 		cell = (cur_posy + (cur_posx << 2))
+
+		prev_win = match_win(cur_block)
+		self.board[cur_block] |= (1 << (cell << 1))
+		if not prev_win and match_win(cur_block):
+			self.last_win = True
+		else:
+			self.last_win = False
 
 		return current_move
