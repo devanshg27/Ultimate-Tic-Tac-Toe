@@ -4,7 +4,7 @@ import signal
 
 MAX_VAL = 2**63
 states = {}
-MAX = (1 << 20)
+MAX = (1 << 14)
 
 def checkX(mask, pos):
 	return (mask & (1 << (pos + pos))) != 0
@@ -163,7 +163,7 @@ def solve(mask):
 		num = checkX(mask, 6) + checkX(mask, 6 + 3) + checkX(mask, 6 + 5) + checkX(mask, 6 + 8)
 		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
 
-	states[mask] = (ans*1.0)/2**15
+	states[mask] = (ans*1.0)/2**9
 	return states[mask]
 
 class Team67():
@@ -180,7 +180,7 @@ class Team67():
 		self.board = [0 for i in xrange(16)]
 
 		# 0 : No winner rn, 1 : X, 2 : O
-		self.block_winner = 0#[0 for i in xrange(16)] 
+		self.block_winner = 0#[0 for i in xrange(16)]
 
 	def signal_handler(self, signum, frame):
 		raise Exception('Timed out!')
@@ -230,22 +230,27 @@ class Team67():
 		return ans
 
 	def heur_draw(self):
-		ans = solve(0) * 6 + solve(1) * 4 + solve(2) * 4 + solve(3) * 6
-		ans += solve(4+0) * 4 + solve(4+1) * 3 + solve(4+2) * 3 + solve(4+3) * 4
-		ans += solve(8+0) * 4 + solve(8+1) * 3 + solve(8+2) * 3 + solve(8+3) * 4
-		ans += solve(12+0) * 6 + solve(12+1) * 4 + solve(12+2) * 4 + solve(12+3) * 6
+		ans = 0
+		ans += solve(self.board[0]) * 6 + solve(self.board[1]) * 4 + solve(self.board[2]) * 4 + solve(self.board[3]) * 6
+		ans -= solve(flipboard(self.board[0])) * 6 + solve(flipboard(self.board[1])) * 4 + solve(flipboard(self.board[2])) * 4 + solve(flipboard(self.board[3])) * 6
+		ans += solve(self.board[4+0]) * 4 + solve(self.board[4+1]) * 3 + solve(self.board[4+2]) * 3 + solve(self.board[4+3]) * 4
+		ans -= solve(flipboard(self.board[4+0])) * 4 + solve(flipboard(self.board[4+1])) * 3 + solve(flipboard(self.board[4+2])) * 3 + solve(flipboard(self.board[4+3])) * 4
+		ans += solve(self.board[8+0]) * 4 + solve(self.board[8+1]) * 3 + solve(self.board[8+2]) * 3 + solve(self.board[8+3]) * 4
+		ans -= solve(flipboard(self.board[8+0])) * 4 + solve(flipboard(self.board[8+1])) * 3 + solve(flipboard(self.board[8+2])) * 3 + solve(flipboard(self.board[8+3])) * 4
+		ans += solve(self.board[12+0]) * 6 + solve(self.board[12+1]) * 4 + solve(self.board[12+2]) * 4 + solve(self.board[12+3]) * 6
+		ans -= solve(flipboard(self.board[12+0])) * 6 + solve(flipboard(self.board[12+1])) * 4 + solve(flipboard(self.board[12+2])) * 4 + solve(flipboard(self.board[12+3])) * 6
 		return ans
 
 	def evaluation(self):
 		if match_win(self.block_winner):
-			return 2**30
+			return 2**63
 		if match_loss(self.block_winner):
-			return -2**30
+			return -2**63
 		return self.heur()
 
 	def evaluation_draw(self):
 		if match_loss(self.block_winner):
-			return -2**30
+			return -2**63
 		return self.heur_draw()
 
 	def getValidMoves(self, old_move):
@@ -399,10 +404,11 @@ class Team67():
 	def minimax_draw(self, depth, alpha, beta, isMaximizing, old_move, current_hash, bonus_used):
 		# check terminal state here
 
-		if depth == 0:
-			return self.evaluation_draw()
-
 		if (current_hash, isMaximizing, bonus_used) in self.cached_states:
+			return self.cached_states[(current_hash, isMaximizing, bonus_used)]
+
+		if depth == 0:
+			self.cached_states[(current_hash, isMaximizing, bonus_used)] = self.evaluation_draw()
 			return self.cached_states[(current_hash, isMaximizing, bonus_used)]
 
 		valid_moves = self.getValidMoves(old_move)
