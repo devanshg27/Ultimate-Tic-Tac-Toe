@@ -2,7 +2,7 @@ from random import randint
 import time
 import signal
 
-MAX_VAL = 2**63
+MAX_VAL = 2**69
 states = {}
 MAX = (1 << 14)
 
@@ -170,6 +170,7 @@ class Team67():
 
 	def __init__(self):
 		self.last_win = False
+		self.can_use_bonus = True
 		self.level = 0
 		self.cached_states = {}
 		self.zobrist_hash = 0
@@ -295,14 +296,14 @@ class Team67():
 		self.board[cur_block] |= (1 << (cell + cell + flag))
 		self.zobrist_hash ^= self.zobrist_values[flag][(cur_x << 4) + cur_y]
 
+		if checkX(self.block_winner, cur_block):
+			self.block_winner ^= (1 << (cur_block + cur_block))
+		elif checkO(self.block_winner, cur_block):
+			self.block_winner ^= (1 << (cur_block + cur_block + 1))
 		if match_win(self.board[cur_block]):
 			self.block_winner |= (1 << (cur_block + cur_block))
 		elif match_loss(self.board[cur_block]):
 			self.block_winner |= (1 << (cur_block + cur_block + 1))
-		elif checkX(self.block_winner, cur_block):
-			self.block_winner ^= (1 << (cur_block + cur_block))
-		elif checkO(self.block_winner, cur_block):
-			self.block_winner ^= (1 << (cur_block + cur_block + 1))
 
 		if checkX(self.block_winner, cur_block) or checkO(self.block_winner, cur_block):
 			return True
@@ -319,28 +320,30 @@ class Team67():
 		self.board[cur_block] -= (1 << (cell + cell + flag))
 		self.zobrist_hash ^= self.zobrist_values[flag][(cur_x << 4) + cur_y]
 
+		if checkX(self.block_winner, cur_block):
+			self.block_winner ^= (1 << (cur_block + cur_block))
+		elif checkO(self.block_winner, cur_block):
+			self.block_winner ^= (1 << (cur_block + cur_block + 1))
 		if match_win(self.board[cur_block]):
 			self.block_winner |= (1 << (cur_block + cur_block))
 		elif match_loss(self.board[cur_block]):
 			self.block_winner |= (1 << (cur_block + cur_block + 1))
-		elif checkX(self.block_winner, cur_block):
-			self.block_winner ^= (1 << (cur_block + cur_block))
-		elif checkO(self.block_winner, cur_block):
-			self.block_winner ^= (1 << (cur_block + cur_block + 1))
 
 
 	def minimax(self, depth, alpha, beta, isMaximizing, old_move, current_hash, bonus_used):
 		# check terminal state here
 
-		if depth == 0:
-			return self.evaluation()
-
 		if (current_hash, isMaximizing, bonus_used) in self.cached_states:
+			return self.cached_states[(current_hash, isMaximizing, bonus_used)]
+
+		if depth == 0:
+			self.cached_states[(current_hash, isMaximizing, bonus_used)] = self.evaluation()
 			return self.cached_states[(current_hash, isMaximizing, bonus_used)]
 
 		valid_moves = self.getValidMoves(old_move)
 
 		if not len(valid_moves):
+			assert False
 			return randint(-MAX_VAL, MAX_VAL)
 
 		new_val = 0
@@ -414,6 +417,7 @@ class Team67():
 		valid_moves = self.getValidMoves(old_move)
 
 		if not len(valid_moves):
+			assert False
 			return randint(-MAX_VAL, MAX_VAL)
 
 		new_val = 0
@@ -424,9 +428,9 @@ class Team67():
 				win_block = self.try_update(current_move, 0)
 
 				if win_block and not bonus_used:
-					t_val = self.minimax(depth - 1, alpha, beta, isMaximizing, current_move, self.zobrist_hash, True)
+					t_val = self.minimax_draw(depth - 1, alpha, beta, isMaximizing, current_move, self.zobrist_hash, True)
 				else:
-					t_val = self.minimax(depth - 1, alpha, beta, not isMaximizing, current_move, self.zobrist_hash, False)
+					t_val = self.minimax_draw(depth - 1, alpha, beta, not isMaximizing, current_move, self.zobrist_hash, False)
 
 				if t_val > new_val:
 					if self.level == depth:
@@ -451,9 +455,9 @@ class Team67():
 				win_block = self.try_update(current_move, 1)
 
 				if win_block and not bonus_used:
-					t_val = self.minimax(depth - 1, alpha, beta, isMaximizing, current_move, self.zobrist_hash, True)
+					t_val = self.minimax_draw(depth - 1, alpha, beta, isMaximizing, current_move, self.zobrist_hash, True)
 				else:
-					t_val = self.minimax(depth - 1, alpha, beta, not isMaximizing, current_move, self.zobrist_hash, False)
+					t_val = self.minimax_draw(depth - 1, alpha, beta, not isMaximizing, current_move, self.zobrist_hash, False)
 
 				if t_val < new_val:
 					if self.level == depth:
@@ -490,6 +494,7 @@ class Team67():
 
 		# self.print_board(board)		
 		self.zobrist_hash = 0
+		self.block_winner = 0
 
 		for current_block in xrange(16):
 			self.board[current_block] = 0
@@ -509,10 +514,6 @@ class Team67():
 				self.block_winner |= (1 << (current_block + current_block))
 			elif match_loss(self.board[current_block]):
 				self.block_winner |= (1 << (current_block + current_block + 1))
-			elif checkX(self.block_winner, current_block):# No winner right now
-				self.block_winner ^= (1 << (current_block + current_block))
-			elif checkO(self.block_winner, current_block):
-				self.block_winner ^= (1 << (current_block + current_block + 1))
 
 	def move(self, board, old_move, flag):
 
@@ -573,8 +574,8 @@ class Team67():
 		# 	# if depth > 7:
 		# 	# 	break
 
-		# print "old move", old_move
-		# print "cur move", current_move
+		print "old move", old_move
+		print "cur move", current_move
 
 
 		(cur_x, cur_y) = (current_move[0], current_move[1])
@@ -585,9 +586,11 @@ class Team67():
 
 		prev_win = match_win(self.board[cur_block])
 		self.board[cur_block] |= (1 << (cell << 1))
-		if not prev_win and match_win(self.board[cur_block]):
+		if not prev_win and match_win(self.board[cur_block]) and self.can_use_bonus:
 			self.last_win = True
+			self.can_use_bonus = False
 		else:
 			self.last_win = False
+			self.can_use_bonus = True
 
 		return current_move

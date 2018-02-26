@@ -188,7 +188,7 @@ class Board:
 def player_turn(game_board, old_move, obj, ply, opp, flg):
 		temp_board_status = copy.deepcopy(game_board.board_status)
 		temp_block_status = copy.deepcopy(game_board.block_status)
-		signal.alarm(TIME*7)
+		signal.alarm(TIME)
 		WINNER = ''
 		MESSAGE = ''
 		pts = {"P1" : 0, "P2" : 0}
@@ -369,9 +369,6 @@ if __name__ == '__main__':
 	elif option == '4':
 		obj1 = Team67()
 		obj2 = Random_Player()
-	elif option == '5':
-		obj2 = Team67()
-		obj1 = pplayer()
 	else:
 		print 'Invalid option'
 		sys.exit(1)
