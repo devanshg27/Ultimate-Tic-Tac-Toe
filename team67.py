@@ -152,16 +152,21 @@ class Team67():
 	def minimax(self, depth, alpha, beta, isMaximizing, old_move, current_hash, bonus_used):
 		# check terminal state here
 
+		if depth == 0:
+			return randint(-MAX_VAL, MAX_VAL)
+
 		if (current_hash, isMaximizing, bonus_used) in self.cached_states:
 			return self.cached_states[(current_hash, isMaximizing, bonus_used)]
 
 		valid_moves = self.getValidMoves(old_move)
 
+		if not len(valid_moves):
+			return randint(-MAX_VAL, MAX_VAL)
+
 		new_val = 0
 		if isMaximizing:
 			new_val = -MAX_VAL
 			for current_move in valid_moves:
-
 				# update changes in global variables here
 				win_block = self.try_update(current_move)
 
@@ -172,6 +177,8 @@ class Team67():
 
 				if t_val > new_val:
 					if self.level == depth:
+						# print "YES"
+						# print current_move[0] & 3, current_move[1] & 3
 						self.best_move = current_move
 					new_val = t_val
 
@@ -185,7 +192,31 @@ class Team67():
 					break
 		
 		else:
-			pass
+			new_val = MAX_VAL
+			for current_move in valid_moves:
+				# update changes in global variables here
+				win_block = self.try_update(current_move)
+
+				if win_block and not bonus_used:
+					t_val = self.minimax(depth - 1, alpha, beta, isMaximizing, current_move, self.zobrist_hash, True)
+				else:
+					t_val = self.minimax(depth - 1, alpha, beta, not isMaximizing, current_move, self.zobrist_hash, False)
+
+				if t_val < new_val:
+					if self.level == depth:
+						# print "YES"
+						# print current_move[0] & 3, current_move[1] & 3
+						self.best_move = current_move
+					new_val = t_val
+
+				if beta > new_val:
+					beta = new_val
+
+				# revert changes in global variables here
+				self.try_revert(current_move)
+
+				if beta <= alpha:
+					break
 
 		self.cached_states[(current_hash, isMaximizing, bonus_used)] = new_val
 		return new_val
@@ -254,17 +285,27 @@ class Team67():
 			# starting move
 			current_move = ((0, 0))
 
-		print cur_time
+		# print cur_time
 
-		depth = 3
-		while time.time() - cur_time < 0.1:
+		for depth in xrange(3, 6, 2):
+			print depth
 			self.cached_states = {}
 			self.level = depth
 			self.minimax(depth, -MAX_VAL, MAX_VAL, 1, old_move, self.zobrist_hash, self.last_win)
 			current_move = self.best_move
-			depth = depth + 2
-			# print time.time() - cur_time
-			# print depth
+
+		# depth = 3
+		# while time.time() - cur_time < 10:
+		# 	print time.time() - cur_time
+		# 	self.cached_states = {}
+		# 	self.level = depth
+		# 	self.minimax(depth, -MAX_VAL, MAX_VAL, 1, old_move, self.zobrist_hash, self.last_win)
+		# 	current_move = self.best_move
+		# 	depth = depth + 1
+		# 	# print time.time() - cur_time
+		# 	print depth
+		# 	# if depth > 7:
+		# 	# 	break
 
 		# print "old move", old_move
 		# print "cur move", current_move
