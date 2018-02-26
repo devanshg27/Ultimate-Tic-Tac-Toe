@@ -90,7 +90,7 @@ def solve(mask):
 	if mask in states:
 		return states[mask]
 	if match_win(mask):
-		states[mask] = (MAX)
+		states[mask] = (MAX)+1
 		return MAX
 	elif match_draw(mask):
 		states[mask] = (0)
@@ -163,7 +163,7 @@ def solve(mask):
 		num = checkX(mask, 6) + checkX(mask, 6 + 3) + checkX(mask, 6 + 5) + checkX(mask, 6 + 8)
 		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
 
-	states[mask] = (ans*1.0)/2**9
+	states[mask] = 1+((ans*1.0)/2**9)
 	return states[mask]
 
 class Team67():
@@ -373,7 +373,8 @@ class Team67():
 
 				if beta <= alpha:
 					break
-
+			if self.level == depth:
+				print "Halleluyah", new_val
 		else:
 			new_val = MAX_VAL
 			for current_move in valid_moves:
@@ -447,7 +448,8 @@ class Team67():
 
 				if beta <= alpha:
 					break
-
+			if self.level == depth:
+				print "Halleluyah", new_val
 		else:
 			new_val = MAX_VAL
 			for current_move in valid_moves:
@@ -474,7 +476,7 @@ class Team67():
 
 				if beta <= alpha:
 					break
-
+		
 		self.cached_states[(current_hash, isMaximizing, bonus_used)] = new_val
 		return new_val
 
