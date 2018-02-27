@@ -251,16 +251,16 @@ class Team67():
 		ans -= solve(flipboard(self.board[12+0])) * 6 + solve(flipboard(self.board[12+1])) * 4 + solve(flipboard(self.board[12+2])) * 4 + solve(flipboard(self.board[12+3])) * 6
 		return ans
 
-	def evaluation(self):
+	def evaluation(self, depth):
 		if match_win(self.block_winner):
-			return 2**63
+			return 2**69/depth
 		if match_loss(self.block_winner):
-			return -2**63
+			return -2**69/depth
 		return self.heur()
 
-	def evaluation_draw(self):
+	def evaluation_draw(self, depth):
 		if match_loss(self.block_winner):
-			return -2**63
+			return -2**69/depth
 		return self.heur_draw()
 
 	def getValidMoves(self, old_move):
@@ -348,13 +348,13 @@ class Team67():
 			return self.cached_states[(current_hash, isMaximizing, bonus_used, old_move)]
 
 		if depth == 0:
-			self.cached_states[(current_hash, isMaximizing, bonus_used, old_move)] = self.evaluation()
+			self.cached_states[(current_hash, isMaximizing, bonus_used, old_move)] = self.evaluation(depth)
 			return self.cached_states[(current_hash, isMaximizing, bonus_used, old_move)]
 
 		valid_moves = self.getValidMoves(old_move)
 
 		if not len(valid_moves):
-			return self.evaluation()
+			return self.evaluation(depth)
 
 		new_val = 0
 		if isMaximizing:
@@ -422,13 +422,13 @@ class Team67():
 			return self.cached_states[(current_hash, isMaximizing, bonus_used, old_move)]
 
 		if depth == 0:
-			self.cached_states[(current_hash, isMaximizing, bonus_used, old_move)] = self.evaluation_draw()
+			self.cached_states[(current_hash, isMaximizing, bonus_used, old_move)] = self.evaluation_draw(depth)
 			return self.cached_states[(current_hash, isMaximizing, bonus_used, old_move)]
 
 		valid_moves = self.getValidMoves(old_move)
 
 		if not len(valid_moves):
-			return self.evaluation_draw()
+			return self.evaluation_draw(depth)
 
 		new_val = 0
 		if isMaximizing:
