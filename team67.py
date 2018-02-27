@@ -344,12 +344,12 @@ class Team67():
 	def minimax(self, depth, alpha, beta, isMaximizing, old_move, current_hash, bonus_used):
 		# check terminal state here
 
-		if (current_hash, isMaximizing, bonus_used) in self.cached_states:
-			return self.cached_states[(current_hash, isMaximizing, bonus_used)]
+		if (current_hash, isMaximizing, bonus_used, old_move) in self.cached_states:
+			return self.cached_states[(current_hash, isMaximizing, bonus_used, old_move)]
 
 		if depth == 0:
-			self.cached_states[(current_hash, isMaximizing, bonus_used)] = self.evaluation()
-			return self.cached_states[(current_hash, isMaximizing, bonus_used)]
+			self.cached_states[(current_hash, isMaximizing, bonus_used, old_move)] = self.evaluation()
+			return self.cached_states[(current_hash, isMaximizing, bonus_used, old_move)]
 
 		valid_moves = self.getValidMoves(old_move)
 
@@ -413,18 +413,18 @@ class Team67():
 				if beta <= alpha:
 					break
 
-		self.cached_states[(current_hash, isMaximizing, bonus_used)] = new_val
+		self.cached_states[(current_hash, isMaximizing, bonus_used, old_move)] = new_val
 		return new_val
 
 	def minimax_draw(self, depth, alpha, beta, isMaximizing, old_move, current_hash, bonus_used):
 		# check terminal state here
 
-		if (current_hash, isMaximizing, bonus_used) in self.cached_states:
-			return self.cached_states[(current_hash, isMaximizing, bonus_used)]
+		if (current_hash, isMaximizing, bonus_used, old_move) in self.cached_states:
+			return self.cached_states[(current_hash, isMaximizing, bonus_used, old_move)]
 
 		if depth == 0:
-			self.cached_states[(current_hash, isMaximizing, bonus_used)] = self.evaluation_draw()
-			return self.cached_states[(current_hash, isMaximizing, bonus_used)]
+			self.cached_states[(current_hash, isMaximizing, bonus_used, old_move)] = self.evaluation_draw()
+			return self.cached_states[(current_hash, isMaximizing, bonus_used, old_move)]
 
 		valid_moves = self.getValidMoves(old_move)
 
@@ -488,7 +488,7 @@ class Team67():
 				if beta <= alpha:
 					break
 		
-		self.cached_states[(current_hash, isMaximizing, bonus_used)] = new_val
+		self.cached_states[(current_hash, isMaximizing, bonus_used, old_move)] = new_val
 		return new_val
 
 	def print_board(self, board):
