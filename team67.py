@@ -90,7 +90,7 @@ def solve(mask):
 	if mask in states:
 		return states[mask]
 	if match_win(mask):
-		states[mask] = (MAX)
+		states[mask] = 2**10
 		return MAX
 	elif match_draw(mask):
 		states[mask] = (0)
