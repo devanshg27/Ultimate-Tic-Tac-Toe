@@ -354,8 +354,7 @@ class Team67():
 		valid_moves = self.getValidMoves(old_move)
 
 		if not len(valid_moves):
-			assert False
-			return randint(-MAX_VAL, MAX_VAL)
+			return self.evaluation()
 
 		new_val = 0
 		if isMaximizing:
@@ -429,8 +428,7 @@ class Team67():
 		valid_moves = self.getValidMoves(old_move)
 
 		if not len(valid_moves):
-			assert False
-			return randint(-MAX_VAL, MAX_VAL)
+			return self.evaluation_draw()
 
 		new_val = 0
 		if isMaximizing:
