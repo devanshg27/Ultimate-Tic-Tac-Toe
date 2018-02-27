@@ -90,7 +90,7 @@ def solve(mask):
 	if mask in states:
 		return states[mask]
 	if match_win(mask):
-		states[mask] = (MAX)+1
+		states[mask] = (MAX)
 		return MAX
 	elif match_draw(mask):
 		states[mask] = (0)
@@ -163,7 +163,7 @@ def solve(mask):
 		num = checkX(mask, 6) + checkX(mask, 6 + 3) + checkX(mask, 6 + 5) + checkX(mask, 6 + 8)
 		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
 
-	states[mask] = 1+((ans*1.0)/2**9)
+	states[mask] = ((ans*1.0)/2**9)
 	return states[mask]
 
 class Team67():
@@ -175,6 +175,7 @@ class Team67():
 		self.cached_states = {}
 		self.zobrist_hash = 0
 		self.zobrist_values = [[], []]
+		self.num_moves = 0
 		for i in xrange(256):
 			self.zobrist_values[0].append(randint(0, MAX_VAL))
 			self.zobrist_values[1].append(randint(0, MAX_VAL))
@@ -228,6 +229,14 @@ class Team67():
 		ans += solve(self.board[6]) * solve(self.board[6 + 3]) * solve(self.board[6 + 5]) * solve(self.board[6 + 8])
 		ans -= solve(flipboard(self.board[6])) * solve(flipboard(self.board[6 + 3])) * solve(flipboard(self.board[6 + 5])) * solve(flipboard(self.board[6 + 8]))
 
+		ans += (2**(7-(self.num_moves >> 6))) * (solve(self.board[0]) * 2 + solve(self.board[1]) * 3 + solve(self.board[2]) * 3 + solve(self.board[3]) * 2)
+		ans -= (2**(7-(self.num_moves >> 6))) * (solve(flipboard(self.board[0])) * 2 + solve(flipboard(self.board[1])) * 3 + solve(flipboard(self.board[2])) * 3 + solve(flipboard(self.board[3])) * 2)
+		ans += (2**(7-(self.num_moves >> 6))) * (solve(self.board[4+0]) * 3 + solve(self.board[4+1]) * 4 + solve(self.board[4+2]) * 4 + solve(self.board[4+3]) * 3)
+		ans -= (2**(7-(self.num_moves >> 6))) * (solve(flipboard(self.board[4+0])) * 3 + solve(flipboard(self.board[4+1])) * 4 + solve(flipboard(self.board[4+2])) * 4 + solve(flipboard(self.board[4+3])) * 3)
+		ans += (2**(7-(self.num_moves >> 6))) * (solve(self.board[8+0]) * 3 + solve(self.board[8+1]) * 4 + solve(self.board[8+2]) * 4 + solve(self.board[8+3]) * 3)
+		ans -= (2**(7-(self.num_moves >> 6))) * (solve(flipboard(self.board[8+0])) * 3 + solve(flipboard(self.board[8+1])) * 4 + solve(flipboard(self.board[8+2])) * 4 + solve(flipboard(self.board[8+3])) * 3)
+		ans += (2**(7-(self.num_moves >> 6))) * (solve(self.board[12+0]) * 2 + solve(self.board[12+1]) * 3 + solve(self.board[12+2]) * 3 + solve(self.board[12+3]) * 2)
+		ans -= (2**(7-(self.num_moves >> 6))) * (solve(flipboard(self.board[12+0])) * 2 + solve(flipboard(self.board[12+1])) * 3 + solve(flipboard(self.board[12+2])) * 3 + solve(flipboard(self.board[12+3])) * 2)
 		return ans
 
 	def heur_draw(self):
@@ -295,6 +304,7 @@ class Team67():
 
 		self.board[cur_block] |= (1 << (cell + cell + flag))
 		self.zobrist_hash ^= self.zobrist_values[flag][(cur_x << 4) + cur_y]
+		self.num_moves += 1
 
 		if checkX(self.block_winner, cur_block):
 			self.block_winner ^= (1 << (cur_block + cur_block))
@@ -317,6 +327,7 @@ class Team67():
 		(cur_posx, cur_posy) = (cur_x & 3, cur_y & 3)
 		cell = (cur_posy + (cur_posx << 2))
 
+		self.num_moves -= 1
 		self.board[cur_block] -= (1 << (cell + cell + flag))
 		self.zobrist_hash ^= self.zobrist_values[flag][(cur_x << 4) + cur_y]
 
@@ -374,7 +385,7 @@ class Team67():
 				if beta <= alpha:
 					break
 			if self.level == depth:
-				print "Halleluyah", new_val
+				print "Hallelujah", new_val
 		else:
 			new_val = MAX_VAL
 			for current_move in valid_moves:
@@ -449,7 +460,7 @@ class Team67():
 				if beta <= alpha:
 					break
 			if self.level == depth:
-				print "Halleluyah", new_val
+				print "Hallelujah", new_val
 		else:
 			new_val = MAX_VAL
 			for current_move in valid_moves:
@@ -497,6 +508,7 @@ class Team67():
 		# self.print_board(board)		
 		self.zobrist_hash = 0
 		self.block_winner = 0
+		self.num_moves = 0
 
 		for current_block in xrange(16):
 			self.board[current_block] = 0
@@ -507,9 +519,11 @@ class Team67():
 					if board.board_status[abs_x][abs_y] == '-':
 						pass
 					elif board.board_status[abs_x][abs_y] == my_symbol:
+						self.num_moves += 1
 						self.zobrist_hash ^= self.zobrist_values[0][(abs_x << 4) + abs_y]
 						self.board[current_block] |= (1 << (((x << 2) + y) << 1))
 					else:
+						self.num_moves += 1
 						self.zobrist_hash ^= self.zobrist_values[1][(abs_x << 4) + abs_y]
 						self.board[current_block] |= (1 << ((((x << 2) + y) << 1) + 1))			
 			if match_win(self.board[current_block]):
