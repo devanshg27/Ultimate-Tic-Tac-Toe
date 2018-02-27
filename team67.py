@@ -14,39 +14,39 @@ def checkO(mask, pos):
 
 def flipboard(mask):
 	for i in xrange(16):
-		if checkX(mask, i) or checkO(mask, i):
+		if (mask & (1 <<((i)<<1))) != 0 or (mask & (1<<(((i)<<1)+1))) != 0:
 			mask ^= ( (1 << (i + i)) + (1 << (i + i + 1)) )
 	return mask
 
 def match_win(mask):
 	# Rows and columns
-	if checkX(mask, 0) and checkX(mask, 0 + 1) and checkX(mask, 0 + 2) and checkX(mask, 0 + 3):
+	if (mask & (1 <<((0)<<1))) != 0 and (mask & (1 <<((0 + 1)<<1))) != 0 and (mask & (1 <<((0 + 2)<<1))) != 0 and (mask & (1 <<((0 + 3)<<1))) != 0:
 		return True
-	if checkX(mask, 0) and checkX(mask, 0 + 4) and checkX(mask, 0 + 8) and checkX(mask, 0 + 12):
-		return True
-
-	if checkX(mask, 4) and checkX(mask, 4 + 1) and checkX(mask, 4 + 2) and checkX(mask, 4 + 3):
-		return True
-	if checkX(mask, 1) and checkX(mask, 1 + 4) and checkX(mask, 1 + 8) and checkX(mask, 1 + 12):
+	if (mask & (1 <<((0)<<1))) != 0 and (mask & (1 <<((0 + 4)<<1))) != 0 and (mask & (1 <<((0 + 8)<<1))) != 0 and (mask & (1 <<((0 + 12)<<1))) != 0:
 		return True
 
-	if checkX(mask, 8) and checkX(mask, 8 + 1) and checkX(mask, 8 + 2) and checkX(mask, 8 + 3):
+	if (mask & (1 <<((4)<<1))) != 0 and (mask & (1 <<((4 + 1)<<1))) != 0 and (mask & (1 <<((4 + 2)<<1))) != 0 and (mask & (1 <<((4 + 3)<<1))) != 0:
 		return True
-	if checkX(mask, 2) and checkX(mask, 2 + 4) and checkX(mask, 2 + 8) and checkX(mask, 2 + 12):
+	if (mask & (1 <<((1)<<1))) != 0 and (mask & (1 <<((1 + 4)<<1))) != 0 and (mask & (1 <<((1 + 8)<<1))) != 0 and (mask & (1 <<((1 + 12)<<1))) != 0:
 		return True
 
-	if checkX(mask, 12) and checkX(mask, 12 + 1) and checkX(mask, 12 + 2) and checkX(mask, 12 + 3):
+	if (mask & (1 <<((8)<<1))) != 0 and (mask & (1 <<((8 + 1)<<1))) != 0 and (mask & (1 <<((8 + 2)<<1))) != 0 and (mask & (1 <<((8 + 3)<<1))) != 0:
 		return True
-	if checkX(mask, 3) and checkX(mask, 3 + 4) and checkX(mask, 3 + 8) and checkX(mask, 3 + 12):
+	if (mask & (1 <<((2)<<1))) != 0 and (mask & (1 <<((2 + 4)<<1))) != 0 and (mask & (1 <<((2 + 8)<<1))) != 0 and (mask & (1 <<((2 + 12)<<1))) != 0:
+		return True
+
+	if (mask & (1 <<((12)<<1))) != 0 and (mask & (1 <<((12 + 1)<<1))) != 0 and (mask & (1 <<((12 + 2)<<1))) != 0 and (mask & (1 <<((12 + 3)<<1))) != 0:
+		return True
+	if (mask & (1 <<((3)<<1))) != 0 and (mask & (1 <<((3 + 4)<<1))) != 0 and (mask & (1 <<((3 + 8)<<1))) != 0 and (mask & (1 <<((3 + 12)<<1))) != 0:
 		return True
 	# Diamonds
-	if checkX(mask, 1) and checkX(mask, 1 + 3) and checkX(mask, 1 + 5) and checkX(mask, 1 + 8):
+	if (mask & (1 <<((1)<<1))) != 0 and (mask & (1 <<((1 + 3)<<1))) != 0 and (mask & (1 <<((1 + 5)<<1))) != 0 and (mask & (1 <<((1 + 8)<<1))) != 0:
 		return True
-	if checkX(mask, 2) and checkX(mask, 2 + 3) and checkX(mask, 2 + 5) and checkX(mask, 2 + 8):
+	if (mask & (1 <<((2)<<1))) != 0 and (mask & (1 <<((2 + 3)<<1))) != 0 and (mask & (1 <<((2 + 5)<<1))) != 0 and (mask & (1 <<((2 + 8)<<1))) != 0:
 		return True
-	if checkX(mask, 5) and checkX(mask, 5 + 3) and checkX(mask, 5 + 5) and checkX(mask, 5 + 8):
+	if (mask & (1 <<((5)<<1))) != 0 and (mask & (1 <<((5 + 3)<<1))) != 0 and (mask & (1 <<((5 + 5)<<1))) != 0 and (mask & (1 <<((5 + 8)<<1))) != 0:
 		return True
-	if checkX(mask, 6) and checkX(mask, 6 + 3) and checkX(mask, 6 + 5) and checkX(mask, 6 + 8):
+	if (mask & (1 <<((6)<<1))) != 0 and (mask & (1 <<((6 + 3)<<1))) != 0 and (mask & (1 <<((6 + 5)<<1))) != 0 and (mask & (1 <<((6 + 8)<<1))) != 0:
 		return True
 	return False
 
@@ -56,33 +56,33 @@ def match_loss(mask):
 def match_draw(mask):
 	# Rows and columns
 	cnt = 0
-	if checkO(mask, 0) or checkO(mask, 0 + 1) or checkO(mask, 0 + 2) or checkO(mask, 0 + 3):
+	if (mask & (1<<(((0)<<1)+1))) != 0 or (mask & (1<<(((0 + 1)<<1)+1))) != 0 or (mask & (1<<(((0 + 2)<<1)+1))) != 0 or (mask & (1<<(((0 + 3)<<1)+1))) != 0:
 		cnt += 1
-	if checkO(mask, 0) or checkO(mask, 0 + 4) or checkO(mask, 0 + 8) or checkO(mask, 0 + 12):
-		cnt += 1
-
-	if checkO(mask, 4) or checkO(mask, 4 + 1) or checkO(mask, 4 + 2) or checkO(mask, 4 + 3):
-		cnt += 1
-	if checkO(mask, 1) or checkO(mask, 1 + 4) or checkO(mask, 1 + 8) or checkO(mask, 1 + 12):
+	if (mask & (1<<(((0)<<1)+1))) != 0 or (mask & (1<<(((0 + 4)<<1)+1))) != 0 or (mask & (1<<(((0 + 8)<<1)+1))) != 0 or (mask & (1<<(((0 + 12)<<1)+1))) != 0:
 		cnt += 1
 
-	if checkO(mask, 8) or checkO(mask, 8 + 1) or checkO(mask, 8 + 2) or checkO(mask, 8 + 3):
+	if (mask & (1<<(((4)<<1)+1))) != 0 or (mask & (1<<(((4 + 1)<<1)+1))) != 0 or (mask & (1<<(((4 + 2)<<1)+1))) != 0 or (mask & (1<<(((4 + 3)<<1)+1))) != 0:
 		cnt += 1
-	if checkO(mask, 2) or checkO(mask, 2 + 4) or checkO(mask, 2 + 8) or checkO(mask, 2 + 12):
+	if (mask & (1<<(((1)<<1)+1))) != 0 or (mask & (1<<(((1 + 4)<<1)+1))) != 0 or (mask & (1<<(((1 + 8)<<1)+1))) != 0 or (mask & (1<<(((1 + 12)<<1)+1))) != 0:
 		cnt += 1
 
-	if checkO(mask, 12) or checkO(mask, 12 + 1) or checkO(mask, 12 + 2) or checkO(mask, 12 + 3):
+	if (mask & (1<<(((8)<<1)+1))) != 0 or (mask & (1<<(((8 + 1)<<1)+1))) != 0 or (mask & (1<<(((8 + 2)<<1)+1))) != 0 or (mask & (1<<(((8 + 3)<<1)+1))) != 0:
 		cnt += 1
-	if checkO(mask, 3) or checkO(mask, 3 + 4) or checkO(mask, 3 + 8) or checkO(mask, 3 + 12):
+	if (mask & (1<<(((2)<<1)+1))) != 0 or (mask & (1<<(((2 + 4)<<1)+1))) != 0 or (mask & (1<<(((2 + 8)<<1)+1))) != 0 or (mask & (1<<(((2 + 12)<<1)+1))) != 0:
+		cnt += 1
+
+	if (mask & (1<<(((12)<<1)+1))) != 0 or (mask & (1<<(((12 + 1)<<1)+1))) != 0 or (mask & (1<<(((12 + 2)<<1)+1))) != 0 or (mask & (1<<(((12 + 3)<<1)+1))) != 0:
+		cnt += 1
+	if (mask & (1<<(((3)<<1)+1))) != 0 or (mask & (1<<(((3 + 4)<<1)+1))) != 0 or (mask & (1<<(((3 + 8)<<1)+1))) != 0 or (mask & (1<<(((3 + 12)<<1)+1))) != 0:
 		cnt += 1
 	# Diamonds
-	if checkO(mask, 1) or checkO(mask, 1 + 3) or checkO(mask, 1 + 5) or checkO(mask, 1 + 8):
+	if (mask & (1<<(((1)<<1)+1))) != 0 or (mask & (1<<(((1 + 3)<<1)+1))) != 0 or (mask & (1<<(((1 + 5)<<1)+1))) != 0 or (mask & (1<<(((1 + 8)<<1)+1))) != 0:
 		cnt += 1
-	if checkO(mask, 2) or checkO(mask, 2 + 3) or checkO(mask, 2 + 5) or checkO(mask, 2 + 8):
+	if (mask & (1<<(((2)<<1)+1))) != 0 or (mask & (1<<(((2 + 3)<<1)+1))) != 0 or (mask & (1<<(((2 + 5)<<1)+1))) != 0 or (mask & (1<<(((2 + 8)<<1)+1))) != 0:
 		cnt += 1
-	if checkO(mask, 5) or checkO(mask, 5 + 3) or checkO(mask, 5 + 5) or checkO(mask, 5 + 8):
+	if (mask & (1<<(((5)<<1)+1))) != 0 or (mask & (1<<(((5 + 3)<<1)+1))) != 0 or (mask & (1<<(((5 + 5)<<1)+1))) != 0 or (mask & (1<<(((5 + 8)<<1)+1))) != 0:
 		cnt += 1
-	if checkO(mask, 6) or checkO(mask, 6 + 3) or checkO(mask, 6 + 5) or checkO(mask, 6 + 8):
+	if (mask & (1<<(((6)<<1)+1))) != 0 or (mask & (1<<(((6 + 3)<<1)+1))) != 0 or (mask & (1<<(((6 + 5)<<1)+1))) != 0 or (mask & (1<<(((6 + 8)<<1)+1))) != 0:
 		cnt += 1
 	return (cnt == 12)
 
@@ -98,69 +98,69 @@ def solve(mask):
 
 	ans = (0)
 
-	if checkO(mask, 0) or checkO(mask, 0 + 1) or checkO(mask, 0 + 2) or checkO(mask, 0 + 3):
+	if (mask & (1<<(((0)<<1)+1))) != 0 or (mask & (1<<(((0 + 1)<<1)+1))) != 0 or (mask & (1<<(((0 + 2)<<1)+1))) != 0 or (mask & (1<<(((0 + 3)<<1)+1))) != 0:
 		pass
 	else:
-		num = checkX(mask, 0) + checkX(mask, 0 + 1) + checkX(mask, 0 + 2) + checkX(mask, 0 + 3)
+		num = (mask & (1 <<((0)<<1))) != 0 + (mask & (1 <<((0 + 1)<<1))) != 0 + (mask & (1 <<((0 + 2)<<1))) != 0 + (mask & (1 <<((0 + 3)<<1))) != 0
 		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
-	if checkO(mask, 0) or checkO(mask, 0 + 4) or checkO(mask, 0 + 8) or checkO(mask, 0 + 12):
+	if (mask & (1<<(((0)<<1)+1))) != 0 or (mask & (1<<(((0 + 4)<<1)+1))) != 0 or (mask & (1<<(((0 + 8)<<1)+1))) != 0 or (mask & (1<<(((0 + 12)<<1)+1))) != 0:
 		pass
 	else:
-		num = checkX(mask, 0) + checkX(mask, 0 + 4) + checkX(mask, 0 + 8) + checkX(mask, 0 + 12)
-		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
-
-	if checkO(mask, 4) or checkO(mask, 4 + 1) or checkO(mask, 4 + 2) or checkO(mask, 4 + 3):
-		pass
-	else:
-		num = checkX(mask, 4) + checkX(mask, 4 + 1) + checkX(mask, 4 + 2) + checkX(mask, 4 + 3)
-		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
-	if checkO(mask, 1) or checkO(mask, 1 + 4) or checkO(mask, 1 + 8) or checkO(mask, 1 + 12):
-		pass
-	else:
-		num = checkX(mask, 1) + checkX(mask, 1 + 4) + checkX(mask, 1 + 8) + checkX(mask, 1 + 12)
+		num = (mask & (1 <<((0)<<1))) != 0 + (mask & (1 <<((0 + 4)<<1))) != 0 + (mask & (1 <<((0 + 8)<<1))) != 0 + (mask & (1 <<((0 + 12)<<1))) != 0
 		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
 
-	if checkO(mask, 8) or checkO(mask, 8 + 1) or checkO(mask, 8 + 2) or checkO(mask, 8 + 3):
+	if (mask & (1<<(((4)<<1)+1))) != 0 or (mask & (1<<(((4 + 1)<<1)+1))) != 0 or (mask & (1<<(((4 + 2)<<1)+1))) != 0 or (mask & (1<<(((4 + 3)<<1)+1))) != 0:
 		pass
 	else:
-		num = checkX(mask, 8) + checkX(mask, 8 + 1) + checkX(mask, 8 + 2) + checkX(mask, 8 + 3)
+		num = (mask & (1 <<((4)<<1))) != 0 + (mask & (1 <<((4 + 1)<<1))) != 0 + (mask & (1 <<((4 + 2)<<1))) != 0 + (mask & (1 <<((4 + 3)<<1))) != 0
 		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
-	if checkO(mask, 2) or checkO(mask, 2 + 4) or checkO(mask, 2 + 8) or checkO(mask, 2 + 12):
+	if (mask & (1<<(((1)<<1)+1))) != 0 or (mask & (1<<(((1 + 4)<<1)+1))) != 0 or (mask & (1<<(((1 + 8)<<1)+1))) != 0 or (mask & (1<<(((1 + 12)<<1)+1))) != 0:
 		pass
 	else:
-		num = checkX(mask, 2) + checkX(mask, 2 + 4) + checkX(mask, 2 + 8) + checkX(mask, 2 + 12)
+		num = (mask & (1 <<((1)<<1))) != 0 + (mask & (1 <<((1 + 4)<<1))) != 0 + (mask & (1 <<((1 + 8)<<1))) != 0 + (mask & (1 <<((1 + 12)<<1))) != 0
 		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
 
-	if checkO(mask, 12) or checkO(mask, 12 + 1) or checkO(mask, 12 + 2) or checkO(mask, 12 + 3):
+	if (mask & (1<<(((8)<<1)+1))) != 0 or (mask & (1<<(((8 + 1)<<1)+1))) != 0 or (mask & (1<<(((8 + 2)<<1)+1))) != 0 or (mask & (1<<(((8 + 3)<<1)+1))) != 0:
 		pass
 	else:
-		num = checkX(mask, 12) + checkX(mask, 12 + 1) + checkX(mask, 12 + 2) + checkX(mask, 12 + 3)
+		num = (mask & (1 <<((8)<<1))) != 0 + (mask & (1 <<((8 + 1)<<1))) != 0 + (mask & (1 <<((8 + 2)<<1))) != 0 + (mask & (1 <<((8 + 3)<<1))) != 0
 		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
-	if checkO(mask, 3) or checkO(mask, 3 + 4) or checkO(mask, 3 + 8) or checkO(mask, 3 + 12):
+	if (mask & (1<<(((2)<<1)+1))) != 0 or (mask & (1<<(((2 + 4)<<1)+1))) != 0 or (mask & (1<<(((2 + 8)<<1)+1))) != 0 or (mask & (1<<(((2 + 12)<<1)+1))) != 0:
 		pass
 	else:
-		num = checkX(mask, 3) + checkX(mask, 3 + 4) + checkX(mask, 3 + 8) + checkX(mask, 3 + 12)
+		num = (mask & (1 <<((2)<<1))) != 0 + (mask & (1 <<((2 + 4)<<1))) != 0 + (mask & (1 <<((2 + 8)<<1))) != 0 + (mask & (1 <<((2 + 12)<<1))) != 0
+		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
+
+	if (mask & (1<<(((12)<<1)+1))) != 0 or (mask & (1<<(((12 + 1)<<1)+1))) != 0 or (mask & (1<<(((12 + 2)<<1)+1))) != 0 or (mask & (1<<(((12 + 3)<<1)+1))) != 0:
+		pass
+	else:
+		num = (mask & (1 <<((12)<<1))) != 0 + (mask & (1 <<((12 + 1)<<1))) != 0 + (mask & (1 <<((12 + 2)<<1))) != 0 + (mask & (1 <<((12 + 3)<<1))) != 0
+		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
+	if (mask & (1<<(((3)<<1)+1))) != 0 or (mask & (1<<(((3 + 4)<<1)+1))) != 0 or (mask & (1<<(((3 + 8)<<1)+1))) != 0 or (mask & (1<<(((3 + 12)<<1)+1))) != 0:
+		pass
+	else:
+		num = (mask & (1 <<((3)<<1))) != 0 + (mask & (1 <<((3 + 4)<<1))) != 0 + (mask & (1 <<((3 + 8)<<1))) != 0 + (mask & (1 <<((3 + 12)<<1))) != 0
 		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
 	# Diamonds
-	if checkO(mask, 1) or checkO(mask, 1 + 3) or checkO(mask, 1 + 5) or checkO(mask, 1 + 8):
+	if (mask & (1<<(((1)<<1)+1))) != 0 or (mask & (1<<(((1 + 3)<<1)+1))) != 0 or (mask & (1<<(((1 + 5)<<1)+1))) != 0 or (mask & (1<<(((1 + 8)<<1)+1))) != 0:
 		pass
 	else:
-		num = checkX(mask, 1) + checkX(mask, 1 + 3) + checkX(mask, 1 + 5) + checkX(mask, 1 + 8)
+		num = (mask & (1 <<((1)<<1))) != 0 + (mask & (1 <<((1 + 3)<<1))) != 0 + (mask & (1 <<((1 + 5)<<1))) != 0 + (mask & (1 <<((1 + 8)<<1))) != 0
 		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
-	if checkO(mask, 2) or checkO(mask, 2 + 3) or checkO(mask, 2 + 5) or checkO(mask, 2 + 8):
+	if (mask & (1<<(((2)<<1)+1))) != 0 or (mask & (1<<(((2 + 3)<<1)+1))) != 0 or (mask & (1<<(((2 + 5)<<1)+1))) != 0 or (mask & (1<<(((2 + 8)<<1)+1))) != 0:
 		pass
 	else:
-		num = checkX(mask, 2) + checkX(mask, 2 + 3) + checkX(mask, 2 + 5) + checkX(mask, 2 + 8)
+		num = (mask & (1 <<((2)<<1))) != 0 + (mask & (1 <<((2 + 3)<<1))) != 0 + (mask & (1 <<((2 + 5)<<1))) != 0 + (mask & (1 <<((2 + 8)<<1))) != 0
 		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
-	if checkO(mask, 5) or checkO(mask, 5 + 3) or checkO(mask, 5 + 5) or checkO(mask, 5 + 8):
+	if (mask & (1<<(((5)<<1)+1))) != 0 or (mask & (1<<(((5 + 3)<<1)+1))) != 0 or (mask & (1<<(((5 + 5)<<1)+1))) != 0 or (mask & (1<<(((5 + 8)<<1)+1))) != 0:
 		pass
 	else:
-		num = checkX(mask, 5) + checkX(mask, 5 + 3) + checkX(mask, 5 + 5) + checkX(mask, 5 + 8)
+		num = (mask & (1 <<((5)<<1))) != 0 + (mask & (1 <<((5 + 3)<<1))) != 0 + (mask & (1 <<((5 + 5)<<1))) != 0 + (mask & (1 <<((5 + 8)<<1))) != 0
 		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
-	if checkO(mask, 6) or checkO(mask, 6 + 3) or checkO(mask, 6 + 5) or checkO(mask, 6 + 8):
+	if (mask & (1<<(((6)<<1)+1))) != 0 or (mask & (1<<(((6 + 3)<<1)+1))) != 0 or (mask & (1<<(((6 + 5)<<1)+1))) != 0 or (mask & (1<<(((6 + 8)<<1)+1))) != 0:
 		pass
 	else:
-		num = checkX(mask, 6) + checkX(mask, 6 + 3) + checkX(mask, 6 + 5) + checkX(mask, 6 + 8)
+		num = (mask & (1 <<((6)<<1))) != 0 + (mask & (1 <<((6 + 3)<<1))) != 0 + (mask & (1 <<((6 + 5)<<1))) != 0 + (mask & (1 <<((6 + 8)<<1))) != 0
 		ans	+= (MAX >> (((4 - num)*(5 - num))>>1))
 
 	states[mask] = ((ans*1.0)/2**9)
