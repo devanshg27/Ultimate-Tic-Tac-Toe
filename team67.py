@@ -201,7 +201,7 @@ class Team67():
 		self.block_winner = 0#[0 for i in xrange(16)]
 
 	def signal_handler(self, signum, frame):
-		raise Exception('Timed out!')
+		raise Exception('Time!')
 
 	def heur(self):
 		ans = 0
@@ -400,7 +400,7 @@ class Team67():
 				if beta <= alpha:
 					break
 			if self.level == depth:
-				print "Hallelujah", new_val
+				print "value ", new_val
 		else:
 			new_val = MAX_VAL
 			for current_move in valid_moves:
@@ -474,7 +474,7 @@ class Team67():
 				if beta <= alpha:
 					break
 			if self.level == depth:
-				print "Hallelujah", new_val
+				print "value ", new_val
 		else:
 			new_val = MAX_VAL
 			for current_move in valid_moves:
